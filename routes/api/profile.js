@@ -2,6 +2,7 @@ const express = require('express');
 const auth = require('../../middleware/auth');
 const Profile = require('../../models/Profile');
 const User = require('../../models/User');
+const mongoose = require('mongoose');
 const { check, validationResult } = require('express-validator');
 const { restart } = require('nodemon');
 
@@ -237,8 +238,8 @@ router.delete('/experience/:exp_id', auth, async (req, res) => {
       .map((item) => item.id)
       .indexOf(req.params.exp_id);
 
-    if (removeIndex === undefined || removeIndex === -1)
-      throw Error('Server Error');
+    // if (removeIndex === undefined || removeIndex === -1)
+    //   throw Error('Server Error');
 
     profile.experience.splice(removeIndex, 1);
 
@@ -255,51 +256,56 @@ router.delete('/experience/:exp_id', auth, async (req, res) => {
 // @desc    UPDATE profile experience
 // @access  PRIVATE
 
-// router.put('/experience/:exp_id', async (req, res) => {
-//   try {
-//     const profile = await Profile.findOne({ user: req.user.id });
+router.put('/experience/:exp_id', auth, async (req, res) => {
+  try {
+    var objectid = req.params.exp_id;
+    const profile = await Profile.findOne({ user: req.user.id });
 
-//     const updateIndex = profile.experience
-//       .map((item) => item.id)
-//       .indexOf(req.params.exp_id);
+    const updateIndex = profile.experience
+      .map((item) => item.id)
+      .indexOf(objectid);
 
-//     if (removeIndex === undefined || removeIndex === -1)
-//       throw Error('Server Error');
+    if (updateIndex === undefined || updateIndex === -1)
+      throw Error('Server Error');
 
-//     console.log(profile.experience[updateIndex]);
+    var oldExperience = { ...profile.experience[updateIndex] };
+    var newExperience = { ...req.body };
 
-//     // const {
-//     //   title,
-//     //   company,
-//     //   location,
-//     //   from,
-//     //   to,
-//     //   current,
-//     //   description
-//     // } = req.body;
+    const newUpdatedProfile = {};
+    newUpdatedProfile.current = newExperience.current;
+    newUpdatedProfile.title = newExperience.title || oldExperience.title;
+    newUpdatedProfile.company = newExperience.company || oldExperience.company;
+    newUpdatedProfile.location =
+      newExperience.location || oldExperience.location;
+    newUpdatedProfile.from = newExperience.from || oldExperience.from;
+    newUpdatedProfile.to = newExperience.to || oldExperience.to;
+    newUpdatedProfile.description =
+      newExperience.description || oldExperience.description;
 
-//     // const newExp = {
-//     //   title,
-//     //   company,
-//     //   location,
-//     //   from,
-//     //   to,
-//     //   current,
-//     //   description
-//     // };
-//     // //Get remove index
-//     // const removeIndex = profile.experience
-//     //   .map((item) => item.id)
-//     //   .indexOf(req.params.exp_id);
+    //Get remove index
+    let profileUpdate = await Profile.findOneAndUpdate(
+      {
+        user: mongoose.Types.ObjectId(`${req.user.id}`),
+        'experience._id': mongoose.Types.ObjectId(`${objectid}`)
+      },
+      {
+        $set: {
+          'experience.$.current': newUpdatedProfile.current,
+          'experience.$.title': newUpdatedProfile.title,
+          'experience.$.company': newUpdatedProfile.company,
+          'experience.$.location': newUpdatedProfile.location,
+          'experience.$.from': newUpdatedProfile.from,
+          'experience.$.to': newUpdatedProfile.to,
+          'experience.$.description': newUpdatedProfile.description
+        }
+      },
+      { new: true }
+    );
 
-//     // profile.experience.splice(removeIndex, 1);
-
-//     // await profile.save();
-
-//     // res.json(profile);
-//   } catch (err) {
-//     console.error(err.message);
-//     res.status(500).send('Server Error');
-//   }
-// });
+    res.json(profileUpdate);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server Error');
+  }
+});
 module.exports = router;
