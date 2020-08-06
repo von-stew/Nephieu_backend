@@ -285,27 +285,32 @@ router.put('/experience/:exp_id', auth, async (req, res) => {
     newUpdatedProfile.description =
       newExperience.description || oldExperience.description;
 
-    //Get remove index
-    let profileUpdate = await Profile.findOneAndUpdate(
-      {
-        user: mongoose.Types.ObjectId(`${req.user.id}`),
-        'experience._id': mongoose.Types.ObjectId(`${objectid}`)
-      },
-      {
-        $set: {
-          'experience.$.current': newUpdatedProfile.current,
-          'experience.$.title': newUpdatedProfile.title,
-          'experience.$.company': newUpdatedProfile.company,
-          'experience.$.location': newUpdatedProfile.location,
-          'experience.$.from': newUpdatedProfile.from,
-          'experience.$.to': newUpdatedProfile.to,
-          'experience.$.description': newUpdatedProfile.description
-        }
-      },
-      { new: true }
-    );
+    profile.experience[updateIndex] = {
+      _id: mongoose.Types.ObjectId(`${objectid}`),
+      ...newUpdatedProfile
+    };
 
-    res.json(profileUpdate);
+    await profile.save();
+    // Code removed but good to look at for findOneAndUpdate
+    // let profileUpdate = await Profile.findOneAndUpdate(
+    //   {
+    //     user: mongoose.Types.ObjectId(`${req.user.id}`),
+    //     'experience._id': mongoose.Types.ObjectId(`${objectid}`)
+    //   },
+    //   {
+    //     $set: {
+    //       'experience.$.current': newUpdatedProfile.current,
+    //       'experience.$.title': newUpdatedProfile.title,
+    //       'experience.$.company': newUpdatedProfile.company,
+    //       'experience.$.location': newUpdatedProfile.location,
+    //       'experience.$.from': newUpdatedProfile.from,
+    //       'experience.$.to': newUpdatedProfile.to,
+    //       'experience.$.description': newUpdatedProfile.description
+    //     }
+    //   },
+    //   { new: true }
+    // );
+    res.json(profile);
   } catch (err) {
     console.error(err.message);
     res.status(500).send('Server Error');
