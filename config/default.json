@@ -1,4 +1,6 @@
 {
   "mongoURI": "mongodb+srv://vonstew:Oyster@nephieu.1w2xv.mongodb.net/<dbname>?retryWrites=true&w=majority",
-  "jwtSecret": "dirtylittlesecret"
+  "jwtSecret": "dirtylittlesecret",
+  "githubClientId": "3270c21155e93a3e590f",
+  "githubSecret": "7dfc34eb8be6020a7e9292ebe493cd0cb1002e5d"
 }
