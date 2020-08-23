@@ -5,7 +5,6 @@ import moment from 'moment';
 
 const Education = ({ education }) => {
   const educations = education.map((edu) => {
-    console.log(edu);
     return (
       <tr key={edu._id}>
         <td> {edu.school}</td>
