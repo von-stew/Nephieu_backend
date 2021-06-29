@@ -10,7 +10,6 @@ const Posts = ({ getPosts, post: { posts, loading } }) => {
     getPosts();
   }, [getPosts]);
 
-  console.log(posts);
   return loading ? (
     <Spinner />
   ) : (
@@ -22,8 +21,8 @@ const Posts = ({ getPosts, post: { posts, loading } }) => {
       {/*PostForm */}{' '}
       <div className='posts'>
         {' '}
-        {posts.map((post) => (
-          <PostItem key={post._id} post={post} />
+        {posts.map((p) => (
+          <PostItem key={p._id} post={p} />
         ))}
       </div>
     </Fragment>
